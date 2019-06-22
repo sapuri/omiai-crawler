@@ -21,7 +21,7 @@ class OmiaiCrawler:
         self.__wait_for_login()
         self.__load_items()
         self.__crawl()
-        time.sleep(30)
+        time.sleep(10)
         self.driver.quit()
         print('Finished')
 
@@ -31,8 +31,10 @@ class OmiaiCrawler:
                 self.driver, timeout).until(
                 EC.presence_of_element_located(
                     (By.CLASS_NAME, 'search-list-item')))
-        except TimeoutException as te:
-            print('Timeout:', te)
+        except TimeoutException:
+            print('Timeout')
+            self.driver.quit()
+            quit(1)
 
     def __load_items(self, page_num: int = 5):
         for _ in range(0, page_num):
