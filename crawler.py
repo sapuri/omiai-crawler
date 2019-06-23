@@ -1,3 +1,4 @@
+import argparse
 import time
 
 from selenium import webdriver
@@ -19,7 +20,7 @@ class OmiaiCrawler:
         """
         :param type: <recommend | login | interests | fresh>
         :param page_num: number of loading pages
-        :param timeout: timeout time for waiting for login
+        :param timeout: timeout time for waiting for login (sec)
         """
         self.driver.get('https://www.omiai-jp.com/search')
         print('Waiting for login...')
@@ -74,16 +75,51 @@ class OmiaiCrawler:
     def __crawl(self):
         for i, item in enumerate(
                 self.driver.find_elements_by_class_name('search-list-item')):
-            print(i + 1, item.get_attribute('data-nickname'))
+            print(f'#{i + 1}', item.get_attribute('data-nickname'))
             item.click()
             time.sleep(0.3)
             self.driver.back()
             time.sleep(0.7)
 
 
+def load_args():
+    parser = argparse.ArgumentParser(
+        description='Omiai Crawler: A web crawler for Omiai with ChromeDriver')
+    parser.add_argument(
+        '-w',
+        '--width',
+        default=1280,
+        help='width of the Chrome window')
+    parser.add_argument(
+        '-ht',
+        '--height',
+        default=960,
+        help='height of the Chrome window')
+    parser.add_argument(
+        '-t',
+        '--type',
+        default='',
+        help='<recommend | login | interests | fresh>')
+    parser.add_argument(
+        '-n',
+        '--page_num',
+        default=5,
+        help='number of loading pages')
+    parser.add_argument(
+        '-tmo',
+        '--timeout',
+        default=180,
+        help='timeout time for waiting for login (sec)')
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
-    crawler = OmiaiCrawler()
+    args = load_args()
+    crawler = OmiaiCrawler(width=args.width, height=args.height)
     try:
-        crawler.run(type='fresh', page_num=5)
+        crawler.run(
+            type=args.type,
+            page_num=args.page_num,
+            timeout=args.timeout)
     except KeyboardInterrupt:
         quit(0)
