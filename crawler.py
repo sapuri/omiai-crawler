@@ -1,4 +1,6 @@
 import argparse
+import os
+import pickle
 import time
 
 from selenium import webdriver
@@ -22,16 +24,35 @@ class OmiaiCrawler:
         :param page_num: number of loading pages
         :param timeout: timeout time for waiting for login (sec)
         """
-        self.driver.get('https://www.omiai-jp.com/search')
-        print('Waiting for login...')
+        top_url = 'https://www.omiai-jp.com/'
+        target_url = 'https://www.omiai-jp.com/search'
+        pickle_file_path = 'cookies.pkl'
+
+        self.driver.get(top_url)
+        self.__load_cookies(pickle_file_path)
+        self.driver.get(target_url)
         self.__wait_for_login(timeout)
+        self.__save_cookies(pickle_file_path)
+
         self.__select_search_menu(type)
         self.__close_info_dialog(type)
         self.__load_items(page_num)
         self.__crawl()
+
         time.sleep(10)
         self.driver.quit()
         print('Finished')
+
+    def __load_cookies(self, pickle_file_path: str):
+        if os.path.isfile(pickle_file_path):
+            with open(pickle_file_path, 'rb') as f:
+                cookies = pickle.load(f)
+                for cookie in cookies:
+                    self.driver.add_cookie(cookie)
+
+    def __save_cookies(self, pickle_file_path: str):
+        with open(pickle_file_path, 'wb') as f:
+            pickle.dump(self.driver.get_cookies(), f)
 
     def __wait_for_login(self, timeout: int = 180):
         try:
@@ -88,11 +109,13 @@ def load_args():
     parser.add_argument(
         '-w',
         '--width',
+        type=int,
         default=1280,
         help='width of the Chrome window')
     parser.add_argument(
         '-ht',
         '--height',
+        type=int,
         default=960,
         help='height of the Chrome window')
     parser.add_argument(
@@ -103,11 +126,13 @@ def load_args():
     parser.add_argument(
         '-n',
         '--page_num',
+        type=int,
         default=5,
         help='number of loading pages')
     parser.add_argument(
         '-tmo',
         '--timeout',
+        type=int,
         default=180,
         help='timeout time for waiting for login (sec)')
     return parser.parse_args()
