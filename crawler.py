@@ -97,7 +97,15 @@ class OmiaiCrawler:
         for i, item in enumerate(
                 self.driver.find_elements_by_class_name('search-list-item')):
             print(f'#{i + 1}', item.get_attribute('data-nickname'))
-            item.click()
+            try:
+                item.click()
+            except BaseException as e:
+                print('failed to click element:', e)
+                print('retrying...')
+                time.sleep(1)
+                item.click()
+                print('OK!')
+
             time.sleep(0.3)
             self.driver.back()
             time.sleep(0.7)
