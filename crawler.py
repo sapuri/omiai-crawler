@@ -1,6 +1,7 @@
 import argparse
 import os
 import pickle
+import random
 import time
 
 from selenium import webdriver
@@ -105,10 +106,9 @@ class OmiaiCrawler:
                 time.sleep(1)
                 item.click()
                 print('OK!')
-
-            time.sleep(0.3)
+            time.sleep(random.random())
             self.driver.back()
-            time.sleep(0.7)
+            time.sleep(0.5 + random.random())
 
 
 def load_args():
