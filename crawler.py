@@ -5,7 +5,7 @@ import random
 import time
 
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementNotInteractableException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -15,7 +15,7 @@ class OmiaiCrawler:
     def __init__(self, width: int = 1280, height: int = 960):
         options = webdriver.ChromeOptions()
         options.add_argument(
-            '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36')
+            '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36')
         self.driver = webdriver.Chrome(options=options)
         self.driver.set_window_size(width, height)
 
@@ -25,13 +25,11 @@ class OmiaiCrawler:
         :param page_num: number of loading pages
         :param timeout: timeout time for waiting for login (sec)
         """
-        top_url = 'https://www.omiai-jp.com/'
-        target_url = 'https://www.omiai-jp.com/search'
+        login_url = 'https://www.omiai-jp.com/login/external'
         pickle_file_path = 'cookies.pkl'
 
-        self.driver.get(top_url)
+        self.driver.get(login_url)
         self.__load_cookies(pickle_file_path)
-        self.driver.get(target_url)
         self.__wait_for_login(timeout)
         self.__save_cookies(pickle_file_path)
 
@@ -40,7 +38,7 @@ class OmiaiCrawler:
         self.__load_items(page_num)
         self.__crawl()
 
-        time.sleep(10)
+        time.sleep(3)
         self.driver.quit()
         print('Finished')
 
@@ -50,12 +48,15 @@ class OmiaiCrawler:
                 cookies = pickle.load(f)
                 for cookie in cookies:
                     self.driver.add_cookie(cookie)
+            print('Cookies loaded')
 
     def __save_cookies(self, pickle_file_path: str):
         with open(pickle_file_path, 'wb') as f:
             pickle.dump(self.driver.get_cookies(), f)
+        print('Cookies saved')
 
     def __wait_for_login(self, timeout: int = 180):
+        self.driver.refresh()
         try:
             WebDriverWait(
                 self.driver, timeout).until(
@@ -100,11 +101,16 @@ class OmiaiCrawler:
             print(f'#{i + 1}', item.get_attribute('data-nickname'))
             try:
                 item.click()
-            except BaseException as e:
+            except ElementNotInteractableException as e:
                 print('failed to click element:', e)
                 print('retrying...')
                 time.sleep(1)
-                item.click()
+                try:
+                    item.click()
+                except ElementNotInteractableException as e:
+                    print('failed to click element:', e)
+                    self.driver.quit()
+                    quit(1)
                 print('OK!')
             time.sleep(random.random())
             self.driver.back()
