@@ -4,9 +4,16 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+flake8-import-order = "*"
+flake8 = "*"
+autopep8 = "*"
 
 [packages]
 selenium = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
+
+[scripts]
+format = "autopep8 -ivr ."
+lint = "flake8 --show-source ."
