@@ -12,10 +12,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class OmiaiCrawler:
-    def __init__(self, width: int = 1280, height: int = 960):
+    def __init__(self, width: int = 1280, height: int = 960, headless: bool = False):
         options = webdriver.ChromeOptions()
+        if headless:
+            options.add_argument('--headless')
         options.add_argument(
             '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36')
+
         self.driver = webdriver.Chrome(options=options)
         self.driver.set_window_size(width, height)
 
@@ -149,12 +152,17 @@ def load_args():
         type=int,
         default=180,
         help='timeout time for waiting for login (sec)')
+    parser.add_argument(
+        '-hl',
+        '--headless',
+        action='store_true',
+        help='runs Chrome in headless mode')
     return parser.parse_args()
 
 
 if __name__ == '__main__':
     args = load_args()
-    crawler = OmiaiCrawler(width=args.width, height=args.height)
+    crawler = OmiaiCrawler(width=args.width, height=args.height, headless=args.headless)
     try:
         crawler.run(
             type=args.type,
