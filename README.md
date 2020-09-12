@@ -3,8 +3,7 @@ A web crawler for Omiai with ChromeDriver
 
 ```
 $ python crawler.py -h                                                                                                                                                                                                                   14:27:30  ☁  master ☂ ⚡
-usage: crawler.py [-h] [-w WIDTH] [-ht HEIGHT] [-t TYPE] [-n PAGE_NUM]
-                  [-tmo TIMEOUT]
+usage: crawler.py [-h] [-w WIDTH] [-ht HEIGHT] [-t TYPE] [-n PAGE_NUM] [-tmo TIMEOUT] [-hl]
 
 Omiai Crawler: A web crawler for Omiai with ChromeDriver
 
@@ -19,4 +18,5 @@ optional arguments:
                         number of loading pages
   -tmo TIMEOUT, --timeout TIMEOUT
                         timeout time for waiting for login (sec)
+  -hl, --headless       runs Chrome in headless mode
 ```
